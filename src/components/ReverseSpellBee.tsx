@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Heart, Lightbulb, Trophy } from 'lucide-react';
-import { FormEventHandler, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const ReverseSpellBee = () => {
   const [word, setWord] = useState('');
@@ -146,7 +146,7 @@ const ReverseSpellBee = () => {
     return (similarity / Math.max(input.length, word.length)) >= similarityThreshold;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
     const currentContent = getCurrentContent();
     
