@@ -165,6 +165,7 @@ const ReverseSpellBee = () => {
     <Card className="w-full max-w-lg mx-auto mt-[5%]">
       <CardHeader className="text-center">
         <div className="flex justify-between items-center mb-4">
+          <img className='h-10 w-auto' src="/logo.webp" alt="" />
           <CardTitle className="text-2xl font-bold">{currentContent.title}</CardTitle>
           <div className="flex items-center gap-2">
             <span className="text-sm">EN</span>
