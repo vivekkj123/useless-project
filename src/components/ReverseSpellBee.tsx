@@ -15,6 +15,7 @@ const ReverseSpellBee = () => {
   const [challenge, setChallenge] = useState('');
   const [hint, setHint] = useState('');
   const [isMalayalam, setIsMalayalam] = useState(false);
+  const [currentWordIndex, setCurrentWordIndex] = useState(-1);
 
   // Bilingual content
   const content = {
@@ -69,7 +70,7 @@ const ReverseSpellBee = () => {
         { word: 'മഴ', meaning: 'Rain', hint: 'Mix ഴ with ള' }
       ],
       challenges: [
-        'മാറ്റുക "ട" മുതൽ "റ്റ" വരെ',
+        '"ട" മുതൽ "റ്റ" വരെ മാറ്റുക',
         'സ്വരചിഹ്നങ്ങൾ മാറ്റുക',
         'വ്യഞ്ജനങ്ങൾ ഇരട്ടിപ്പിക്കുക',
         'സമാന ശബ്ദമുള്ള അക്ഷരങ്ങൾ മാറ്റുക',
@@ -82,22 +83,52 @@ const ReverseSpellBee = () => {
     return isMalayalam ? content.malayalam : content.english;
   };
 
+  // Ensure a fresh challenge and word each time the language changes
+  useEffect(() => {
+    getRandomWord();
+  }, [isMalayalam]);
+
+  // Modified to ensure we get the right word and challenge for the current language
   const getRandomWord = () => {
     const currentContent = getCurrentContent();
-    const randomIndex = Math.floor(Math.random() * currentContent.words.length);
-    setWord(currentContent.words[randomIndex].word);
-    setHint(currentContent.words[randomIndex].hint);
-    setChallenge(currentContent.challenges[Math.floor(Math.random() * currentContent.challenges.length)]);
+    const words = currentContent.words;
+
+    // Reset word index if we've shown all words
+    if (currentWordIndex >= words.length - 1) {
+      setCurrentWordIndex(-1);
+    }
+
+    // Get a new random word index that we haven't used yet
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * words.length);
+    } while (newIndex === currentWordIndex);
+
+    setCurrentWordIndex(newIndex);
+    setWord(words[newIndex].word);
+    setHint(words[newIndex].hint);
+
+    // Choose a challenge specific to the current language
+    const randomChallenge = currentContent.challenges[Math.floor(Math.random() * currentContent.challenges.length)];
+    setChallenge(randomChallenge);
+
     setUserInput('');
     setMessage('');
   };
 
+
   const checkMisspelling = (input: string) => {
-    if (input === word) {
+    if (!input || input === word) {
       return false;
     }
 
+    // Ensure Malayalam input when in Malayalam mode
     if (isMalayalam && !/[\u0D00-\u0D7F]/.test(input)) {
+      return false;
+    }
+
+    // Ensure English input when in English mode
+    if (!isMalayalam && /[\u0D00-\u0D7F]/.test(input)) {
       return false;
     }
 
@@ -143,11 +174,13 @@ const ReverseSpellBee = () => {
     setScore(0);
     setLives(3);
     setGameOver(false);
+    setCurrentWordIndex(-1);
     getRandomWord();
   };
 
   const handleLanguageToggle = () => {
     setIsMalayalam(!isMalayalam);
+    setCurrentWordIndex(-1); // Reset word index when switching languages
     resetGame();
   };
 
@@ -162,10 +195,10 @@ const ReverseSpellBee = () => {
   const currentContent = getCurrentContent();
 
   return (
-    <Card className="w-full max-w-lg mx-auto mt-[5%]">
+    <Card className="w-full max-w-lg mx-auto mt-8">
       <CardHeader className="text-center">
         <div className="flex justify-between items-center mb-4">
-          <img className='h-10 w-auto' src="/logo.webp" alt="" />
+          <img className="h-10 w-auto" src="/logo.webp" alt="" />
           <CardTitle className="text-2xl font-bold">{currentContent.title}</CardTitle>
           <div className="flex items-center gap-2">
             <span className="text-sm">EN</span>
